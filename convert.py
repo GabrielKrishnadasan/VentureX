@@ -2,9 +2,9 @@ import pandas as pd
 import openpyxl as opxl
 import shutil
 import os
-from pptx import Presentation 
-
-wb = opxl.load_workbook("Membership Proposal Details.xlsx")
+from pptx import Presentation
+from pptx.util import Pt
+from pptx.dml.color import RGBColor
 
 class company:
     def __init__(self):
@@ -53,15 +53,30 @@ def gatherInfo(obj, sheetname):
 def copy_ppt(source_ppt, destination_ppt):
     shutil.copyfile(source_ppt, destination_ppt)
 
+def edit_ppt_text(pptFile, obj, path):
+    presentation = Presentation(pptFile)
 
-path = os.getcwd()
+    for item in presentation.slides[0].shapes:
+        if hasattr(item, "text"):
+            if item.text == "Replace me":
+                item.text = obj.companyName + " Proposal"
+
+                for paragraph in item.text_frame.paragraphs:
+                    for run in paragraph.runs:
+                        run.font.name = "Bebas Neue"
+                        run.font.size = Pt(72)
+                        run.font.color.rgb = RGBColor(255,255,255)
+
+    presentation.save(f"{path}/{obj.companyName} VX Proposal.pptx")    
+
+
 obj = company()
 sheetname = "Membership Proposal Details.xlsx"
 
 gatherInfo(obj, sheetname)
 
-sourcePPT = "VX Proposal Template Updated .pptx"
+sourcePPT = "VX Proposal Template.pptx"
+path = os.getcwd()
 
-destinationPPT = f"{path}/{obj.companyName} Proposal Template.pptx"
 
-copy_ppt(sourcePPT, destinationPPT)
+edit_ppt_text(sourcePPT, obj, path)
