@@ -5,6 +5,7 @@ import os
 from pptx import Presentation
 from pptx.util import Pt
 from pptx.dml.color import RGBColor
+from pptx.enum.text import PP_ALIGN
 
 class company:
     def __init__(self):
@@ -54,18 +55,42 @@ def copy_ppt(source_ppt, destination_ppt):
     shutil.copyfile(source_ppt, destination_ppt)
 
 def edit_ppt_text(pptFile, obj, path):
+    editDict = {}
+    editDict["space1"] = obj.space
+    editDict["description1"] = obj.description
+    editDict["term1"] = obj.term
+    editDict["price1"] = obj.rate
+
+
     presentation = Presentation(pptFile)
 
     for item in presentation.slides[0].shapes:
         if hasattr(item, "text"):
-            if item.text == "Replace me":
-                item.text = obj.companyName + " Proposal"
-
+            if item.text == "Company name":
+                item.text = obj.companyName + " Proposal"      
                 for paragraph in item.text_frame.paragraphs:
                     for run in paragraph.runs:
                         run.font.name = "Bebas Neue"
                         run.font.size = Pt(72)
                         run.font.color.rgb = RGBColor(255,255,255)
+
+    for item in presentation.slides[5].shapes:
+        if hasattr(item, "text"):
+            if item.text == "Quote for XYZ Company":
+                item.text = "Quote for " + obj.companyName + " Company"
+                for paragraph in item.text_frame.paragraphs:
+                    for run in paragraph.runs:
+                        run.font.name = "Bebas Neue"
+                        run.font.size = Pt(66)
+                        run.font.color.rgb = RGBColor(0,0,0)
+            if item.text in editDict:
+                item.text = editDict[item.text]
+                for paragraph in item.text_frame.paragraphs:
+                    paragraph.alignment = PP_ALIGN.CENTER
+                    for run in paragraph.runs:
+                        run.font.name = "Open Sans"
+                        run.font.size = Pt(22)
+                        run.font.color.rgb = RGBColor(0,0,0)
 
     presentation.save(f"{path}/{obj.companyName} VX Proposal.pptx")    
 
