@@ -8,6 +8,10 @@ from pptx import Presentation
 from pptx.util import Pt
 from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN
+from docx import Document
+from datetime import date
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 class company:
     def __init__(self):
@@ -95,7 +99,7 @@ def edit_ppt_text(pptFile, obj, path):
                         run.font.size = Pt(66)
                         run.font.color.rgb = RGBColor(0,0,0)
             if item.text in editDict:
-                item.text = editDict[item.text]
+                item.text = str(editDict[item.text])
                 for paragraph in item.text_frame.paragraphs:
                     paragraph.alignment = PP_ALIGN.CENTER
                     for run in paragraph.runs:
@@ -103,8 +107,47 @@ def edit_ppt_text(pptFile, obj, path):
                         run.font.size = Pt(22)
                         run.font.color.rgb = RGBColor(0,0,0)
 
-    presentation.save(f"{path}/{obj.companyName} VX Proposal.pptx")    
+    presentation.save(f"{path}/{obj.companyName} VX Proposal.pptx")   
 
+def replace_text(doc, old_text, new_text):
+    """
+    Replace old_text with new_text in all paragraphs of the docx document.
+    """
+    for paragraph in doc.paragraphs:
+        if old_text in paragraph.text:
+            for run in paragraph.runs:
+                run.text = run.text.replace(old_text, new_text)
+
+    for table in doc.tables:
+        for row in table.rows:
+            for cell in row.cells:
+                if old_text in cell.text:
+                    for paragraph in cell.paragraphs:
+                        for run in paragraph.runs:
+                            run.text = run.text.replace(old_text, new_text)
+
+def edit_docx_text(docxFile, obj, path):
+    today = datetime.today()
+    today = today.strftime("%m/%d/%Y")
+    currentDate = datetime.now()
+
+    endTermDate = currentDate + relativedelta(months=obj.term)
+    endTermDate = endTermDate.strftime("%m/%d/%Y")
+
+    doc = Document(docxFile)
+
+    replace_text(doc, "DATEREPLACE", today)
+    replace_text(doc, "DATEREPLACE", today)
+    replace_text(doc, "DATEREPLACE", today)
+    replace_text(doc, "NAMEREPLACE", obj.companyName)
+    replace_text(doc, "SPACEREPLACE", obj.space)
+    replace_text(doc, "TERMREPLACE", str(obj.term))
+    replace_text(doc, "EXPIRATIONREPLACE", endTermDate)
+    #Need to update below GK
+    replace_text(doc, "DEPOSITREPLACE", "placeholder")
+
+    doc.save(f"{path}/{obj.companyName} VX Membership Agreement.docx")
+    pass        
 
 #Gets the directory location of the script
 script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -114,6 +157,8 @@ os.chdir(script_dir)
 path = os.getcwd()
 #Gets the template pptx
 sourcePPT = f"{path}/VX Proposal Template.pptx"
+#Gets the template docx
+sourceDoc = f"{path}/Venture X Membership Agreement And T&C Generic Jan 24.docx"
 #Gets the data excel sheet
 sheetname = f"{path}/Membership Proposal Details.xlsx"
 
@@ -123,3 +168,6 @@ gatherInfo(obj, sheetname)
 
 #Calls the edit_ppt_text method
 edit_ppt_text(sourcePPT, obj, path)
+
+#Calls the edit_docx_text method
+edit_docx_text(sourceDoc, obj, path)
