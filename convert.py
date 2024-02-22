@@ -27,8 +27,10 @@ class company:
         self.misc = ""
         self.link = ""
     
-
 def gatherInfo(obj, sheetname):
+    """
+    Takes a comapny object and a specifit excel spreadsheet, and gathers the data from the excel and places it into the company object
+    """
     wb = opxl.load_workbook(sheetname)
     wb._active_sheet_index = 0
     ws = wb.active
@@ -54,9 +56,16 @@ def gatherInfo(obj, sheetname):
     obj.link = ws["B17"].value
 
 def copy_ppt(source_ppt, destination_ppt):
+    """
+    Might not need this
+    """
     shutil.copyfile(source_ppt, destination_ppt)
 
 def edit_ppt_text(pptFile, obj, path):
+    """
+    Takes the template pptx, company object, and current path/working directory and updates the template pptx with
+    the data from the excel sheet and makes a copy of the template to store in the same directory
+    """
     editDict = {}
     editDict["space1"] = obj.space
     editDict["description1"] = obj.description
@@ -97,17 +106,20 @@ def edit_ppt_text(pptFile, obj, path):
     presentation.save(f"{path}/{obj.companyName} VX Proposal.pptx")    
 
 
+#Gets the directory location of the script
 script_dir = os.path.dirname(os.path.realpath(__file__))
-
+#Changes current directory to that of the script
 os.chdir(script_dir)
-
+#Saves the path to the script in path
 path = os.getcwd()
+#Gets the template pptx
 sourcePPT = f"{path}/VX Proposal Template.pptx"
-
-obj = company()
+#Gets the data excel sheet
 sheetname = f"{path}/Membership Proposal Details.xlsx"
 
+#Creates an instance of company class and populates its variables with gather info
+obj = company()
 gatherInfo(obj, sheetname)
 
-
+#Calls the edit_ppt_text method
 edit_ppt_text(sourcePPT, obj, path)
