@@ -9,6 +9,7 @@ from pptx.util import Pt
 from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN
 from docx import Document
+from docx.shared import RGBColor as docxColor
 from datetime import date
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -32,6 +33,7 @@ class company:
         self.additionalFees = ""
         self.discountPromo = ""
         self.misc = ""
+        self.deposit = ""
         self.link = ""
     
 def gatherInfo(obj, sheetname):
@@ -61,6 +63,7 @@ def gatherInfo(obj, sheetname):
     obj.additionalFees = ws["B9"].value
     obj.discountPromo = ws["B10"].value
     obj.misc = ws["B12"].value
+    obj.deposit = ws["B13"].value
     obj.link = ws["B17"].value
 
 def edit_ppt_text(pptFile, obj, path):
@@ -116,6 +119,7 @@ def replace_text(doc, old_text, new_text):
         if old_text in paragraph.text:
             for run in paragraph.runs:
                 run.text = run.text.replace(old_text, new_text)
+                run.font.color.rgb = docxColor(0, 0, 0)
 
     for table in doc.tables:
         for row in table.rows:
@@ -124,6 +128,7 @@ def replace_text(doc, old_text, new_text):
                     for paragraph in cell.paragraphs:
                         for run in paragraph.runs:
                             run.text = run.text.replace(old_text, new_text)
+                            run.font.color.rgb = docxColor(0, 0, 0)
 
 def edit_docx_text(docxFile, obj, path):
     """
@@ -148,7 +153,7 @@ def edit_docx_text(docxFile, obj, path):
     replace_text(doc, "TERMREPLACE", str(obj.term))
     replace_text(doc, "EXPIRATIONREPLACE", endTermDate)
     #TODO: Fix below, need info from John
-    replace_text(doc, "DEPOSITREPLACE", "placeholder")
+    replace_text(doc, "DEPOSITREPLACE", f"${obj.deposit}")
 
     doc.save(f"{path}/{obj.companyName} VX Membership Agreement.docx")        
 
