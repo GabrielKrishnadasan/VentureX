@@ -1,9 +1,26 @@
 #!/usr/bin/env python3
 
+import subprocess
+import os
+
+#Gets the directory location of the script
+script_dir = os.path.dirname(os.path.realpath(__file__))
+#Changes current directory to that of the script
+os.chdir(script_dir)
+#Saves the path to the script in path
+path = os.getcwd()
+command = f"pip install -r {path}/requirements.txt"
+
+# Run the command
+try:
+    subprocess.run(command, shell=True, check=True)
+    print("Dependencies installed successfully.")
+except subprocess.CalledProcessError as e:
+    print("Error installing dependencies:", e)
+
+
 import pandas as pd
 import openpyxl as opxl
-import shutil
-import os
 from pptx import Presentation
 from pptx.util import Pt
 from pptx.dml.color import RGBColor
@@ -157,12 +174,6 @@ def edit_docx_text(docxFile, obj, path):
 
     doc.save(f"{path}/{obj.companyName} VX Membership Agreement.docx")        
 
-#Gets the directory location of the script
-script_dir = os.path.dirname(os.path.realpath(__file__))
-#Changes current directory to that of the script
-os.chdir(script_dir)
-#Saves the path to the script in path
-path = os.getcwd()
 #Gets the template pptx
 sourcePPT = f"{path}/VX Proposal Template.pptx"
 #Gets the template docx
