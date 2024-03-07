@@ -14,6 +14,9 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 class company:
+    """
+    company object for the use of storing info gathered from the excel sheet
+    """
     def __init__(self):
         self.fullName = ""
         self.companyName = ""
@@ -34,6 +37,7 @@ class company:
 def gatherInfo(obj, sheetname):
     """
     Takes a comapny object and a specifit excel spreadsheet, and gathers the data from the excel and places it into the company object
+    Note: This gathering only works for the specified Excel workbook that is used in this project
     """
     wb = opxl.load_workbook(sheetname)
     wb._active_sheet_index = 0
@@ -58,12 +62,6 @@ def gatherInfo(obj, sheetname):
     obj.discountPromo = ws["B10"].value
     obj.misc = ws["B12"].value
     obj.link = ws["B17"].value
-
-def copy_ppt(source_ppt, destination_ppt):
-    """
-    Might not need this
-    """
-    shutil.copyfile(source_ppt, destination_ppt)
 
 def edit_ppt_text(pptFile, obj, path):
     """
@@ -98,6 +96,7 @@ def edit_ppt_text(pptFile, obj, path):
                         run.font.name = "Bebas Neue"
                         run.font.size = Pt(66)
                         run.font.color.rgb = RGBColor(0,0,0)
+            #TODO: Once John sends me specs on desc and others, I can start working on auto-formatting
             if item.text in editDict:
                 item.text = str(editDict[item.text])
                 for paragraph in item.text_frame.paragraphs:
@@ -127,10 +126,15 @@ def replace_text(doc, old_text, new_text):
                             run.text = run.text.replace(old_text, new_text)
 
 def edit_docx_text(docxFile, obj, path):
+    """
+    Goes through the whole document and replaces all items that need to be replaced
+    """
+    #Handles date information
     today = datetime.today()
     today = today.strftime("%m/%d/%Y")
     currentDate = datetime.now()
 
+    #Adds term to current date, term need to be in months
     endTermDate = currentDate + relativedelta(months=obj.term)
     endTermDate = endTermDate.strftime("%m/%d/%Y")
 
@@ -143,11 +147,10 @@ def edit_docx_text(docxFile, obj, path):
     replace_text(doc, "SPACEREPLACE", obj.space)
     replace_text(doc, "TERMREPLACE", str(obj.term))
     replace_text(doc, "EXPIRATIONREPLACE", endTermDate)
-    #Need to update below GK
+    #TODO: Fix below, need info from John
     replace_text(doc, "DEPOSITREPLACE", "placeholder")
 
-    doc.save(f"{path}/{obj.companyName} VX Membership Agreement.docx")
-    pass        
+    doc.save(f"{path}/{obj.companyName} VX Membership Agreement.docx")        
 
 #Gets the directory location of the script
 script_dir = os.path.dirname(os.path.realpath(__file__))
